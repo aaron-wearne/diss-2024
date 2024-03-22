@@ -43,4 +43,15 @@ class Comment(models.Model):
     def __str__(self):
         return f"Comment by {self.author} on {self.post}"
     
+class Connections(models.Model):
+    follower = models.ForeignKey(UserProfile, related_name='following', on_delete=models.CASCADE)
+    followed = models.ForeignKey(UserProfile, related_name='followers', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('follower', 'followed')
     
+    def __str__(self):
+        return f"{self.follower} follows {self.followed}"
+    
+
