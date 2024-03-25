@@ -55,3 +55,11 @@ class Connections(models.Model):
         return f"{self.follower} follows {self.followed}"
     
 
+class Share(models.Model):
+    original_post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='shares')
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='shared_posts')
+    comment = models.TextField(blank=True)
+    shared_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user} shared on {self.shared_at}'
