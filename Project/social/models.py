@@ -63,3 +63,39 @@ class Share(models.Model):
 
     def __str__(self):
         return f'{self.user} shared on {self.shared_at}'
+    
+class Homepage:
+    def __init__(self, user_profile):
+        self.user_profile = user_profile
+
+    def get_recent_posts(self):
+        """
+        Fetch recent posts from the user and their connections.
+        """
+        # Assuming a method to get user connections. This will be a simplified placeholder.
+        # In practice, you would perform a database query here.
+        connections = self.user_profile.following.all()
+        connection_ids = [connection.followed.id for connection in connections]
+        
+        # Fetch posts from the user and their connections
+        recent_posts = Post.objects.filter(
+            author__in=connection_ids + [self.user_profile.id]
+        ).order_by('-created_at')[:10]  # Just an example to limit to 10 recent posts
+        
+        return recent_posts
+
+    def get_feed_items(self):
+        """
+        Aggregates feed items such as posts, likes, and comments for the homepage feed.
+        """
+        recent_posts = self.get_recent_posts()
+        feed_items = []
+        for post in recent_posts:
+            post_details = {
+                'post': post,
+                'likes': post.likes.count(),
+                'comments': post.comments.all(),
+                'shares': post.shares.count(),
+            }
+            feed_items.append(post_details)
+        return feed_items
