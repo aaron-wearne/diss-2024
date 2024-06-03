@@ -80,7 +80,7 @@ class Homepage:
         # Fetch posts from the user and their connections
         recent_posts = Post.objects.filter(
             author__in=connection_ids + [self.user_profile.id]
-        ).order_by('-created_at')[:10]  # Just an example to limit to 10 recent posts
+        ).order_by('-created_at')[:100]  # limit of 100 recent posts, may need to lower for demonstration 
         
         return recent_posts
 
