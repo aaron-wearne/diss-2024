@@ -4,5 +4,5 @@ from django.http import HttpResponse
 
 class Index(View):
     def get(self, request, *args, **kwargs):
-        return render(request, 'register/index.html')
+        return render(request, 'landing/index.html')
 
