@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'landing',
     'crispy_forms',
     'social',
+    'crispy_bootstrap4',
 
     'allauth',
     'allauth.account',

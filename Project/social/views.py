@@ -40,7 +40,7 @@ class PostDetailView(View):
 
 
         context = {
-            'post': post
+            'post': post,
 
         }
 
