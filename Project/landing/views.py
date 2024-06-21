@@ -6,3 +6,10 @@ class Index(View):
     def get(self, request, *args, **kwargs):
         return render(request, 'landing/index.html')
 
+class Login(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'account/login.html')
+    
+class Sign_up(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'account/signup.html')
