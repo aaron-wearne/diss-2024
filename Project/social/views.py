@@ -84,3 +84,17 @@ class PostDeleteView(DeleteView):
     model = Post 
     template_name = 'social/post_delete.html'
     success_url = reverse_lazy('post-list')
+
+class CommentDeleteView(DeleteView):
+    model = Comment
+    template_name = 'social/comment_delete.html'
+
+    def get_success_url(self) -> str:
+        comment = self.get_object()
+        return reverse_lazy('post-detail', kwargs={'pk': comment.post.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        comment = self.get_object()
+        context['post_pk'] = comment.post.pk
+        return context
