@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views import View 
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Post, Comment
 from .forms import PostForm, CommentForm
 from django.views.generic.edit import UpdateView, DeleteView
 
 # Create your views here.
-class PostListView(View):
+class PostListView(View, LoginRequiredMixin):
     def get(self, request, *args, **kwargs):
         posts = Post.objects.all().order_by('-created_on')
         form = PostForm()
@@ -35,7 +36,7 @@ class PostListView(View):
         return render(request, 'social/post_list.html', context)
 
 
-class PostDetailView(View):
+class PostDetailView(View, LoginRequiredMixin):
     def get(self, request, pk, *args, **kwargs):
         post = Post.objects.get(pk=pk)
         form = CommentForm()
@@ -71,7 +72,7 @@ class PostDetailView(View):
         }
         return render(request, 'social/post_detail.html', context)
 
-class PostEditView(UpdateView):
+class PostEditView(UpdateView, LoginRequiredMixin, UserPassesTestMixin):
     model = Post
     fields = ['body']
     template_name = 'social/post_edit.html'
@@ -79,6 +80,11 @@ class PostEditView(UpdateView):
     def get_success_url(self) -> str:
         pk = self.kwargs['pk']
         return reverse_lazy('post-detail', kwargs ={'pk':pk})
+    
+    def test_func(self) -> bool | None:
+        post = self.get_object()
+        return self.request.user == post.author 
+
     
 class PostDeleteView(DeleteView):
     model = Post 
