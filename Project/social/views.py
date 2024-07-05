@@ -7,7 +7,7 @@ from .forms import PostForm, CommentForm
 from django.views.generic.edit import UpdateView, DeleteView
 
 # Create your views here.
-class PostListView(View, LoginRequiredMixin):
+class PostListView(LoginRequiredMixin, View): #in future views put loginrequired/userpassesstest before the inherited view else won't work
     def get(self, request, *args, **kwargs):
         posts = Post.objects.all().order_by('-created_on')
         form = PostForm()
@@ -36,7 +36,7 @@ class PostListView(View, LoginRequiredMixin):
         return render(request, 'social/post_list.html', context)
 
 
-class PostDetailView(View, LoginRequiredMixin):
+class PostDetailView(LoginRequiredMixin, View):
     def get(self, request, pk, *args, **kwargs):
         post = Post.objects.get(pk=pk)
         form = CommentForm()
@@ -72,7 +72,7 @@ class PostDetailView(View, LoginRequiredMixin):
         }
         return render(request, 'social/post_detail.html', context)
 
-class PostEditView(UpdateView, LoginRequiredMixin, UserPassesTestMixin):
+class PostEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView): 
     model = Post
     fields = ['body']
     template_name = 'social/post_edit.html'
@@ -81,17 +81,21 @@ class PostEditView(UpdateView, LoginRequiredMixin, UserPassesTestMixin):
         pk = self.kwargs['pk']
         return reverse_lazy('post-detail', kwargs ={'pk':pk})
     
-    def test_func(self) -> bool | None:
+    def test_func(self) -> bool | None: #check for user == author of the post before allowing edit. test with localhost/social/post/edit/*post number*
         post = self.get_object()
         return self.request.user == post.author 
 
     
-class PostDeleteView(DeleteView):
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post 
     template_name = 'social/post_delete.html'
     success_url = reverse_lazy('post-list')
 
-class CommentDeleteView(DeleteView):
+    def test_func(self) -> bool | None: #check for user == author of the post before allowing delete. test with localhost/social/post/delete/*post number*
+        post = self.get_object()
+        return self.request.user == post.author
+
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Comment
     template_name = 'social/comment_delete.html'
 
@@ -104,3 +108,7 @@ class CommentDeleteView(DeleteView):
         comment = self.get_object()
         context['post_pk'] = comment.post.pk
         return context
+    
+    def test_func(self) -> bool | None:
+        post = self.get_object()
+        return self.request.user == post.author
