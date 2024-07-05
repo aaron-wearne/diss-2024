@@ -13,3 +13,11 @@ class Comment(models.Model):
     created_on = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey('Post', on_delete=models.CASCADE)
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, primary_key=True, verbose_name='user', related_name='profile', on_delete=models.CASCADE)
+    name = models.CharField(max_length=20, blank=True, null=True)
+    birth_date = models.DateField(null=True, blank=True)
+    profile_picture = models.ImageField(upload_to='uploads/profile_pictures', default='uploads/profile_pictures/default_picture.jpg', blank=True )
+    bio = models.TextField(max_length=300, blank=True, null=True)
+    location = models.CharField(max_length=100, blank=True, null=True)
