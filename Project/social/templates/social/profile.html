@@ -10,7 +10,23 @@
     <div class="container">
         <div class="row justify-content-center mt-5">
             <div class="col-md-9 col-sm-12 border-bottom">
-                <h5><strong>{{ profile.name }}</strong></h5>
+                {% if profile.name %}
+                <h5><strong>{{ profile.name }}
+                    <span>
+                        {% if request.user == user %}
+                        <a href="{% url 'edit-profile' profile.pk %}" style="color: #333;"><i class="far fa-edit">
+                        </i></a>
+                        {% endif %}
+                    </span>
+                    {% else %}
+                    <h5>{{ user.username }}</h5>
+                        <span>{% if request.user == user %}
+                            <a href="{% url 'edit-profile' profile.pk %}" style="color: #333;"><i class="far fa-edit">
+                            </i></a>
+                            {% endif %}
+                        </span>
+                    {% endif %}
+                </strong></h5>
                 <div class="d-flex border p-3 mb-3">
                     <div class="col-md-10">
                         <img src="{{ profile.profile_picture.url }}" alt="{{ profile.name }}'s profile picture" class="img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;">
