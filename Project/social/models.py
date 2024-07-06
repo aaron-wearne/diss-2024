@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Post(models.Model):
@@ -21,3 +23,14 @@ class UserProfile(models.Model):
     profile_picture = models.ImageField(upload_to='uploads/profile_pictures', default='uploads/profile_pictures/default_picture.jpg', blank=True )
     bio = models.TextField(max_length=300, blank=True, null=True)
     location = models.CharField(max_length=100, blank=True, null=True)
+
+
+#Functions to create the user profile. Will create them as blank automomatically. Maybe can edit the sign up form to add name/birthday etc 
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()
