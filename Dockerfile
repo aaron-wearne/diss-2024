@@ -1,17 +1,17 @@
 FROM python:3.11 
 
+COPY . .
+
 ENV PYTHONUNBUFFERED=1
 
-WORKDIR /code/app
+#WORKDIR /code/Project
 
-COPY . /code/ 
+#COPY . /code/ 
 
-COPY requirements.txt .
+#COPY requirements.txt .
 
 RUN pip install -r requirements.txt 
 
-COPY . .
-
 EXPOSE 8000
 
-CMD [ "python", "manage.py", "runserver" ]
+ENTRYPOINT [ "python", "Project/manage.py", "runserver" ]
