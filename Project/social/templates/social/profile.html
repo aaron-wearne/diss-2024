@@ -47,12 +47,19 @@
                 {% for post in posts %}
                 <div class="row mt-3">
                     <div class="col-md-12 col-sm-12 border-bottom position-relative">
-                        <p><strong>{{ post.author }}</strong> {{ post.created_on }}</p>
-                        <p>{{ post.body }}</p>
-                        <a href="{% url 'post-detail' post.pk %}" class="stretched-link"></a>
+                        <p>
+                            <a style="text-decoration: none" class="text-primary" href="{% url 'profile' post.author.profile.pk %}">
+                            @{{ post.author }}</a> {{ post.created_on }}
+                        </p>
+                        <div class="position-relative">
+                            <p>{{ post.body }}</p>
+                            <a href="{% url 'post-detail' post.pk %}" class="stretched-link"></a>
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
+            </div>
+
             </div>
         </div>
     </div>
