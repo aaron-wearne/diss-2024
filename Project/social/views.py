@@ -158,7 +158,7 @@ class ProfileEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     
 class Follow(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
-        profile = UserProfile.object.get(pk=pk)
+        profile = UserProfile.objects.get(pk=pk)
         profile.followers.add(request.user)
 
         return redirect('profile', pk=profile.pk)
