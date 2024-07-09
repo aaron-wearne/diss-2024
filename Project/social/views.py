@@ -6,7 +6,7 @@ from .models import Post, Comment, UserProfile
 from .forms import PostForm, CommentForm
 from django.views.generic.edit import UpdateView, DeleteView
 from django.http import HttpResponseRedirect
-from django.db.models import Count, Case, When
+from django.db.models import Count, Case, When, Q
 
 # Create your views here.
 class PostListView(LoginRequiredMixin, View): #in future views put loginrequired/userpassesstest before the inherited view else won't work
@@ -200,3 +200,15 @@ class Like(LoginRequiredMixin, View):
         context['post_list'] = post_list
         return context
 
+
+class UserSearch(View):
+    def get(self, request, *args, **kwargs):
+        query =self.request.GET.get('query')
+        profile_list = UserProfile.objects.filter(
+            Q(user__username__icontains = query)
+        )
+
+        context ={
+            'profile_list':profile_list
+        }
+        return render(request, 'social/search.html', context)

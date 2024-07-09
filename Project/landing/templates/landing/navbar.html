@@ -18,7 +18,7 @@
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <!-- Additional nav items can go here -->
         </ul>
-        <form class="d-flex me-3">
+        <form class="d-flex me-3" method="GET" action="{% url 'profile-search' %}">
           <div class="input-group">
             <span class="input-group-text" id="basic-addon1">@</span>
             <input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1" name="query" value="{{ request.GET.query }}">
