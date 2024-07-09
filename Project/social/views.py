@@ -5,6 +5,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Post, Comment, UserProfile
 from .forms import PostForm, CommentForm
 from django.views.generic.edit import UpdateView, DeleteView
+from django.http import HttpResponseRedirect
+from django.db.models import Count, Case, When
 
 # Create your views here.
 class PostListView(LoginRequiredMixin, View): #in future views put loginrequired/userpassesstest before the inherited view else won't work
@@ -169,3 +171,32 @@ class Unfollow(LoginRequiredMixin, View):
         profile.followers.remove(request.user)
         
         return redirect('profile', pk=profile.pk)
+    
+class Like(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        post = Post.objects.get(pk=pk)
+        is_like = False
+
+        for like in post.likes.all():
+            if like == request.user:
+                is_like = True
+                break
+        if not is_like:
+            post.likes.add(request.user)
+
+        if is_like:
+            post.likes.remove(request.user)
+
+        next = request.POST.get('next', '/')
+        return HttpResponseRedirect(next)
+    
+    def get_context_data(self, **kwargs):
+
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        post_list = Post.objects.annotate(
+            liked=Count(Case(When(likes=user, then=1)))
+        )
+        context['post_list'] = post_list
+        return context
+
