@@ -1,0 +1,32 @@
+{% extends 'landing/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-5 col-sm-12 border-bottom">
+            <h2 class="text-center">Recommended Posts</h2>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-5 col-sm-12 border-bottom">
+            <ul class="list-unstyled">
+                {% for post in recommended_posts %}
+                <li class="mb-4 border-bottom mt-3">
+                    <p>
+                        <a style="text-decoration: none" class="text-primary" href="{% url 'profile' post.author.profile.pk %}">
+                            @{{ post.author }}</a> 
+                        {{ post.created_on }}
+                    </p>
+                    <div class="position-relative">
+                        <p>{{ post.body }}</p>
+                        <a href="{% url 'post-detail' post.pk %}" class="stretched-link"></a>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

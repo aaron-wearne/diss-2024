@@ -7,6 +7,7 @@ from .forms import PostForm, CommentForm
 from django.views.generic.edit import UpdateView, DeleteView
 from django.http import HttpResponseRedirect
 from django.db.models import Count, Case, When, Q
+from .recommender import recommend_posts_for_user
 
 # Create your views here.
 class PostListView(LoginRequiredMixin, View): #in future views put loginrequired/userpassesstest before the inherited view else won't work
@@ -212,3 +213,14 @@ class UserSearch(View):
             'profile_list':profile_list
         }
         return render(request, 'social/search.html', context)
+    
+
+class RecommendedPostsView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        recommended_posts = recommend_posts_for_user(user.id)
+        
+        context = {
+            'recommended_posts': recommended_posts
+        }
+        return render(request, 'social/recommended_posts.html', context)
