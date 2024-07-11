@@ -214,7 +214,6 @@ class UserSearch(View):
         }
         return render(request, 'social/search.html', context)
     
-
 class RecommendedPostsView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         user = request.user

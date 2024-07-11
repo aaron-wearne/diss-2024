@@ -25,6 +25,7 @@ class UserProfile(models.Model):
     bio = models.TextField(max_length=300, blank=True, null=True)
     location = models.CharField(max_length=100, blank=True, null=True)
     followers = models.ManyToManyField(User, blank=True, related_name='followers')
+    following = models.ManyToManyField(User, blank=True, related_name='following')
 
 #Functions to create the user profile. Will create them as blank automomatically. Maybe can edit the sign up form to add name/birthday etc 
 @receiver(post_save, sender=User)
