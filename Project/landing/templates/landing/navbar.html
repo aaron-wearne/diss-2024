@@ -1,11 +1,13 @@
+{% load custom_tags %}
+
 <div class="container-fluid gx-0">
   <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
     <div class="container-fluid">
-      <a class="navbar-brand" 
+      <a class="navbar-brand"
         {% if user.is_authenticated %}
           href="{% url 'post-list' %}"
         {% else %}
-          href="{% url 'index' %}
+          href="{% url 'index' %}"
         {% endif %}
       >
         <i class="fa fa-users"></i>
@@ -16,7 +18,9 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <!-- Additional nav items can go here -->
+          <li class="nav-item">
+            {% show_notifications %}
+          </li>
         </ul>
         <form class="d-flex me-3" method="GET" action="{% url 'profile-search' %}">
           <div class="input-group">
