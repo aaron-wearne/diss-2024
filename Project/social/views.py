@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Post, Comment, UserProfile, Notification
 from .forms import PostForm, CommentForm
 from django.views.generic.edit import UpdateView, DeleteView
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.db.models import Count, Case, When, Q
 from .recommender import recommend_posts_for_user
 
@@ -264,3 +264,12 @@ class FollowNotification(View):
         notification.save()
 
         return redirect('profile', pk=profile_pk)
+
+class RemoveNotification(View):
+    def delete(self, request, notification_pk, *args, **kwargs):
+        notification = Notification.objects.get(pk=notification_pk)
+
+        notification.user_has_seen = True
+        notification.save()
+
+        HttpResponse('Notification removed', content_type='text/plain')
