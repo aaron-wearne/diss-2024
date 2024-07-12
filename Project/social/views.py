@@ -70,7 +70,11 @@ class PostDetailView(LoginRequiredMixin, View):
         
         comments = Comment.objects.filter(post=post).order_by('-created_on')
 
-        notification = Notification.objects.create(notification_type=2, from_user=request.user, to_user=post.author, post=post )
+        notification = Notification.objects.create(
+            notification_type=2, 
+            from_user=request.user, 
+            to_user=post.author, 
+            post=post )
 
         context = {
             'post': post,
@@ -169,7 +173,10 @@ class Follow(LoginRequiredMixin, View):
         profile = UserProfile.objects.get(pk=pk)
         profile.followers.add(request.user)
 
-        notification = Notification.objects.create(notification_type=3, from_user=request.user, to_user=profile.user)
+        notification = Notification.objects.create(
+            notification_type=3, 
+            from_user=request.user, 
+            to_user=profile.user)
 
         return redirect('profile', pk=profile.pk)
 
