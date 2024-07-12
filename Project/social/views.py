@@ -32,6 +32,8 @@ class PostListView(LoginRequiredMixin, View): #in future views put loginrequired
             new_post.author = request.user 
             new_post.save()
 
+            new_post.create_tags()
+
 
 
         context = {
@@ -67,6 +69,8 @@ class PostDetailView(LoginRequiredMixin, View):
             new_comment.author = request.user
             new_comment.post = post
             new_comment.save()
+
+            new_comment.create_tags()
         
         comments = Comment.objects.filter(post=post).order_by('-created_on')
 
@@ -272,4 +276,4 @@ class RemoveNotification(View):
         notification.user_has_seen = True
         notification.save()
 
-        HttpResponse('Notification removed', content_type='text/plain')
+        return HttpResponse('Notification removed', content_type='text/plain')
