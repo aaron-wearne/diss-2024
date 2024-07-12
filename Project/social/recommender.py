@@ -3,7 +3,7 @@ from .models import Post
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
-def get_user_likes_matrix():
+def get_user_likes_matrix(): # Dan said Comment plz xoxo make saome comments, to know whats going on sort of thing... sort of thing
     users = list(User.objects.all())
     posts = list(Post.objects.all())
     user_likes = np.zeros((len(users), len(posts)))

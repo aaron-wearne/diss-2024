@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from .models import Post, Comment, UserProfile
+from .models import Post, Comment, UserProfile, Notification
 from .forms import PostForm, CommentForm
 from django.views.generic.edit import UpdateView, DeleteView
 from django.http import HttpResponseRedirect
@@ -223,3 +223,23 @@ class RecommendedPostsView(LoginRequiredMixin, View):
             'recommended_posts': recommended_posts
         }
         return render(request, 'social/recommended_posts.html', context)
+    
+class PostNotification(View):
+    def get(self, request, notification_pk, object_pk, post_pk, *args, **kwargs):
+        notification = Notification.objects.get(pk=notification_pk)
+        post = Post.objects.get(pk=post_pk)
+
+        notification.user_has_seen = True
+        notification.save()
+
+        return redirect('post-detail', pk=post_pk)
+
+class FollowNotification(View):
+    def get(self, request, notification_pk, profile_pk, *args, **kwargs):
+        notification = Notification.objects.get(pk=notification_pk)
+        profile = UserProfile.objects.get(pk=profile_pk)
+
+        notification.user_has_seen = True
+        notification.save()
+
+        return redirect('profile', pk=profile_pk)
