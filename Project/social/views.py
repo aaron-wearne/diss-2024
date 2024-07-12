@@ -191,13 +191,17 @@ class Like(LoginRequiredMixin, View):
                 break
         if not is_like:
             post.likes.add(request.user)
+            notification = Notification.objects.create(
+                notification_type=1,
+                from_user=request.user, 
+                to_user=post.author, 
+                post=post)
 
         if is_like:
             post.likes.remove(request.user)
 
         next = request.POST.get('next', '/')
 
-        notification = Notification.objects.create(notification_type=1, from_user=request.user, to_user=post.author, post=post)
 
         return HttpResponseRedirect(next)
     
