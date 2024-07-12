@@ -32,6 +32,8 @@ class PostListView(LoginRequiredMixin, View): #in future views put loginrequired
             new_post.author = request.user 
             new_post.save()
 
+
+
         context = {
             'post_list': posts,
             'form': form,
@@ -68,10 +70,13 @@ class PostDetailView(LoginRequiredMixin, View):
         
         comments = Comment.objects.filter(post=post).order_by('-created_on')
 
+        notification = Notification.objects.create(notification_type=2, from_user=request.user, to_user=post.author, post=post )
+
         context = {
             'post': post,
             'form': form, 
             'comments': comments,
+            'notification': notification,
         }
         return render(request, 'social/post_detail.html', context)
 
@@ -164,6 +169,8 @@ class Follow(LoginRequiredMixin, View):
         profile = UserProfile.objects.get(pk=pk)
         profile.followers.add(request.user)
 
+        notification = Notification.objects.create(notification_type=3, from_user=request.user, to_user=profile.user)
+
         return redirect('profile', pk=profile.pk)
 
 class Unfollow(LoginRequiredMixin, View):
@@ -189,6 +196,9 @@ class Like(LoginRequiredMixin, View):
             post.likes.remove(request.user)
 
         next = request.POST.get('next', '/')
+
+        notification = Notification.objects.create(notification_type=1, from_user=request.user, to_user=post.author, post=post)
+
         return HttpResponseRedirect(next)
     
     def get_context_data(self, **kwargs):
@@ -225,7 +235,7 @@ class RecommendedPostsView(LoginRequiredMixin, View):
         return render(request, 'social/recommended_posts.html', context)
     
 class PostNotification(View):
-    def get(self, request, notification_pk, object_pk, post_pk, *args, **kwargs):
+    def get(self, request, notification_pk, post_pk, *args, **kwargs):
         notification = Notification.objects.get(pk=notification_pk)
         post = Post.objects.get(pk=post_pk)
 
