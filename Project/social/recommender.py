@@ -1,9 +1,10 @@
 from django.contrib.auth.models import User
-from .models import Post
+from .models import Post, Tag
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
-def get_user_likes_matrix(): # Dan said Comment plz xoxo make saome comments, to know whats going on sort of thing... sort of thing
+# Function to generate the user-likes matrix
+def get_user_likes_matrix():
     users = list(User.objects.all())
     posts = list(Post.objects.all())
     user_likes = np.zeros((len(users), len(posts)))
@@ -15,6 +16,7 @@ def get_user_likes_matrix(): # Dan said Comment plz xoxo make saome comments, to
     
     return user_likes, users, posts
 
+# Function to recommend posts based on user similarity
 def recommend_posts_for_user(user_id, num_recommendations=10):
     user_likes, users, posts = get_user_likes_matrix()
     user_index = [user.id for user in users].index(user_id)
@@ -37,3 +39,18 @@ def recommend_posts_for_user(user_id, num_recommendations=10):
 
     recommended_posts = list(recommended_posts)[:num_recommendations]
     return recommended_posts
+
+# New class to recommend posts based on tags
+class TagRecommender:
+    
+    @staticmethod
+    def get_tags_liked_by_user(user):
+        liked_posts = Post.objects.filter(likes=user)
+        tags = Tag.objects.filter(post__in=liked_posts).distinct()
+        return tags
+
+    @staticmethod
+    def get_recommended_posts_for_user_by_tags(user, num_recommendations=10):
+        tags = TagRecommender.get_tags_liked_by_user(user)
+        tag_recommended_posts = Post.objects.filter(tags__in=tags).distinct().exclude(author=user)
+        return tag_recommended_posts[:num_recommendations]
