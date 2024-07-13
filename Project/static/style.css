@@ -72,7 +72,13 @@
     color: #ddd;
 }
 
-/* Adjust the margin for the notification dropdown wrapper */
-.notifications-badge-wrapper {
-    margin-right: 25px; /* Adjust this value as needed */
+/* Explore button styles */
+.explore-button {
+    transition: 0.3s;
+}
+
+.explore-button:hover {
+    cursor: pointer;
+    opacity: 0.75;
+    transition: 0.3s;
 }

@@ -243,13 +243,21 @@ class RecommendedPostsView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         user = request.user
         recommended_posts = recommend_posts_for_user(user.id)
-        tag_recommended_posts = TagRecommender.get_recommended_posts_for_user_by_tags(user)
 
         context = {
             'recommended_posts': recommended_posts,
-            'tag_recommended_posts': tag_recommended_posts
         }
         return render(request, 'social/recommended_posts.html', context)
+    
+class TagRecommendedPostsView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        tag_recommended_posts = TagRecommender.get_recommended_posts_for_user_by_tags(user)
+
+        context = {
+            'tag_recommended_posts': tag_recommended_posts,
+        }
+        return render(request, 'social/post_tag_recommendations.html', context)
     
 class PostNotification(View):
     def get(self, request, notification_pk, post_pk, *args, **kwargs):

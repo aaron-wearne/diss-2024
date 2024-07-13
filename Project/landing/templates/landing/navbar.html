@@ -13,6 +13,17 @@
         <i class="fa fa-users"></i>
         ActivaHub
       </a>
+      <div class="d-flex justify-content-end w-100">
+        <div class="nav-item dropdown">
+          <a class="btn btn-outline-primary dropdown-toggle explore-button" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-paper-plane"></i> Explore
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="exploreDropdown">
+            <li><a class="dropdown-item" href="{% url 'recommended-posts' %}">Recommended Posts</a></li>
+            <li><a class="dropdown-item" href="{% url 'tag-recommended-posts' %}">Explore Your Interests!</a></li>
+          </ul>
+        </div>
+      </div>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -22,7 +33,7 @@
             {% show_notifications %}
           </li>
         </ul>
-        <form class="d-flex me-3" method="GET" action="{% url 'profile-search' %}">
+        <form class="d-flex me-3 ms-auto" method="GET" action="{% url 'profile-search' %}">
           <div class="input-group">
             <span class="input-group-text" id="basic-addon1">@</span>
             <input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1" name="query" value="{{ request.GET.query }}">
