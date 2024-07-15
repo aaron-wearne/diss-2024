@@ -28,7 +28,7 @@ function removeNotification(removeNotificationURL, notificationElementId) {
     xmlhttp.send();
 }
 
-function getCookie(name) {
+function getCookie(name) { //Disclaimer.<-- Function was copied from Django documentation on javascript 
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
