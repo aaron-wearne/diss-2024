@@ -1,10 +1,13 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from .models import Post, Comment, UserProfile
+from .models import Post, Comment, UserProfile, Notification
 from .forms import PostForm, CommentForm
 from django.views.generic.edit import UpdateView, DeleteView
+from django.http import HttpResponseRedirect, HttpResponse
+from django.db.models import Count, Case, When, Q
+from .recommender import recommend_posts_for_user, TagRecommender
 
 # Create your views here.
 class PostListView(LoginRequiredMixin, View): #in future views put loginrequired/userpassesstest before the inherited view else won't work
@@ -28,6 +31,10 @@ class PostListView(LoginRequiredMixin, View): #in future views put loginrequired
             new_post = form.save(commit=False)
             new_post.author = request.user 
             new_post.save()
+
+            new_post.create_tags()
+
+
 
         context = {
             'post_list': posts,
@@ -62,13 +69,22 @@ class PostDetailView(LoginRequiredMixin, View):
             new_comment.author = request.user
             new_comment.post = post
             new_comment.save()
+
+            new_comment.create_tags()
         
         comments = Comment.objects.filter(post=post).order_by('-created_on')
+
+        notification = Notification.objects.create(
+            notification_type=2, 
+            from_user=request.user, 
+            to_user=post.author, 
+            post=post )
 
         context = {
             'post': post,
             'form': form, 
             'comments': comments,
+            'notification': notification,
         }
         return render(request, 'social/post_detail.html', context)
 
@@ -118,10 +134,156 @@ class ProfileView(View):
         profile = UserProfile.objects.get(pk=pk)
         user = profile.user
         posts = Post.objects.filter(author=user).order_by('-created_on')
+        followers = profile.followers.all()
+
+        if len(followers) == 0:
+            is_following = False
+        
+        for follower in followers:
+            if follower == request.user: #check if follower == user 
+                is_following = True
+                break
+            else:
+                is_following = False #if they're not following set to false
+
+        number_of_followers = len(followers)
 
         context ={
             'user':user,
             'profile':profile,
-            'posts':posts
+            'posts':posts,
+            'number_of_followers': number_of_followers,
+            'is_following': is_following,
+
+
         }
         return render(request,'social/profile.html', context)
+    
+class ProfileEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = UserProfile
+    fields = ['name', 'bio', 'birth_date', 'location', 'profile_picture']
+    template_name = 'social/edit_profile.html'
+
+    def get_success_url(self) -> str:
+        pk=self.kwargs['pk']
+        return reverse_lazy('profile', kwargs={'pk':pk})
+    
+    def test_func(self) -> bool | None:
+        profile=self.get_object()
+        return self.request.user == profile.user 
+    
+class Follow(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        profile = UserProfile.objects.get(pk=pk)
+        profile.followers.add(request.user)
+
+        notification = Notification.objects.create(
+            notification_type=3, 
+            from_user=request.user, 
+            to_user=profile.user)
+
+        return redirect('profile', pk=profile.pk)
+
+class Unfollow(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        profile = UserProfile.objects.get(pk=pk)
+        profile.followers.remove(request.user)
+        
+        return redirect('profile', pk=profile.pk)
+    
+class Like(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        post = Post.objects.get(pk=pk)
+        is_like = False
+
+        for like in post.likes.all():
+            if like == request.user:
+                is_like = True
+                break
+        if not is_like:
+            post.likes.add(request.user)
+            notification = Notification.objects.create(
+                notification_type=1,
+                from_user=request.user, 
+                to_user=post.author, 
+                post=post)
+
+        if is_like:
+            post.likes.remove(request.user)
+
+        next = request.POST.get('next', '/')
+
+
+        return HttpResponseRedirect(next)
+    
+    def get_context_data(self, **kwargs):
+
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        post_list = Post.objects.annotate(
+            liked=Count(Case(When(likes=user, then=1)))
+        )
+        context['post_list'] = post_list
+        return context
+
+
+class UserSearch(View):
+    def get(self, request, *args, **kwargs):
+        query =self.request.GET.get('query')
+        profile_list = UserProfile.objects.filter(
+            Q(user__username__icontains = query)
+        )
+
+        context ={
+            'profile_list':profile_list
+        }
+        return render(request, 'social/search.html', context)
+    
+class RecommendedPostsView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        recommended_posts = recommend_posts_for_user(user.id)
+
+        context = {
+            'recommended_posts': recommended_posts,
+        }
+        return render(request, 'social/recommended_posts.html', context)
+    
+class TagRecommendedPostsView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        tag_recommended_posts = TagRecommender.get_recommended_posts_for_user_by_tags(user)
+
+        context = {
+            'tag_recommended_posts': tag_recommended_posts,
+        }
+        return render(request, 'social/post_tag_recommendations.html', context)
+    
+class PostNotification(View):
+    def get(self, request, notification_pk, post_pk, *args, **kwargs):
+        notification = Notification.objects.get(pk=notification_pk)
+        post = Post.objects.get(pk=post_pk)
+
+        notification.user_has_seen = True
+        notification.save()
+
+        return redirect('post-detail', pk=post_pk)
+
+class FollowNotification(View):
+    def get(self, request, notification_pk, profile_pk, *args, **kwargs):
+        notification = Notification.objects.get(pk=notification_pk)
+        profile = UserProfile.objects.get(pk=profile_pk)
+
+        notification.user_has_seen = True
+        notification.save()
+
+        return redirect('profile', pk=profile_pk)
+
+class RemoveNotification(View):
+    def delete(self, request, notification_pk, *args, **kwargs):
+        notification = Notification.objects.get(pk=notification_pk)
+
+        notification.user_has_seen = True
+        notification.save()
+
+        return HttpResponse('Notification removed', content_type='text/plain')
