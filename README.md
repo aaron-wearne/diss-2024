@@ -1,2 +1,2 @@
 # diss-2024
-# Social media with focus on recomender engine
+# Social media with an intergrated recommender system developed with Django 
